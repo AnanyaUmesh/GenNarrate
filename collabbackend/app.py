@@ -1,8 +1,8 @@
 from flask import Flask, request, jsonify, send_from_directory
-from collabbackend.story_generation import generate_story
-from collabbackend.image_generation import generate_images_from_story
-from collabbackend.audio_generation import generate_audio_from_story
-from collabbackend.pdf_generation import create_pdf
+from story_generation import generate_story
+from image_generation import generate_images_from_story
+from audio_generation import generate_audio_from_story
+from pdf_generation import create_pdf
 from flask_cors import CORS
 import os
 
@@ -80,4 +80,6 @@ def home():
     return "Hello from GenNarrate"
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    from flask_ngrok import run_with_ngrok
+    run_with_ngrok(app)
+    app.run()
