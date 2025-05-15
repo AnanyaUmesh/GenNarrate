@@ -4,11 +4,9 @@ from image_generation import generate_images_from_story
 from audio_generation import generate_audio_from_story
 from pdf_generation import create_pdf
 from flask_cors import CORS
-from flask_ngrok import run_with_ngrok  
 import os
 
 app = Flask(__name__)
-run_with_ngrok(app) 
 CORS(app)
 
 OUTPUT_DIR = "outputs"
@@ -82,4 +80,5 @@ def home():
     return "Hello from GenNarrate"
 
 if __name__ == '__main__':
-    app.run()
+    port = int(sys.argv[1]) if len(sys.argv) > 1 else 5000
+    app.run(port = port)
