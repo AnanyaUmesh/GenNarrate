@@ -6,7 +6,7 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 def extract_key_moments(story: str, n: int):
     try:
-        prompt = f"Extract {n} key visual moments from this story for image generation:\n{story}"
+        prompt = f"Extract {n} key visual moments from this story as prompts for image generation :\n{story} let it be short, crisp and meaningful so that we get good images from the prompt that you give"
 
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
