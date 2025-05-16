@@ -9,7 +9,7 @@ def extract_key_moments(story: str, n: int):
         prompt = f"Extract {n} key visual moments from this story for image generation:\n{story}"
 
         response = client.chat.completions.create(
-            model="gpt-4",
+            model="gpt-3.5-turbo",
             messages=[{"role": "user", "content": prompt}],
             temperature=0.7,
             max_tokens=300
@@ -32,7 +32,7 @@ def generate_images_from_story(story: str, num_images: int = 1):
             image_resp = client.images.generate(
                 prompt=p,
                 n=1,
-                size="512x512",
+                size="1024x1024",
                 model="dall-e-3"  # or "dall-e-2" if DALL·E 3 access isn't enabled
             )
             images.append(image_resp.data[0].url)
