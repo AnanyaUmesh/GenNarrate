@@ -3,6 +3,7 @@ from pydub import AudioSegment
 from pydub.effects import normalize, low_pass_filter
 from diffusers import AudioLDM2Pipeline
 import torch, re, os, scipy
+from google.colab import files
 
 OUTPUT_DIR = "outputs"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -26,7 +27,7 @@ def generate_audio_from_story(story, voice_type, music_prompt):
         narration = normalize(low_pass_filter(narration, 3000))
         narration.export(os.path.join(OUTPUT_DIR, "narration.wav"), format="wav")
 
-        pipe = AudioLDM2Pipeline.from_pretrained("cvssp/audioldm2-music", torch_dtype=torch.float16).to("cuda")
+        pipe = AudioLDM2Pipeline.from_pretrained("cvssp/audioldm2", torch_dtype=torch.float16).to("cuda")
         duration_sec = len(narration) // 1000
         music = pipe(prompt=music_prompt, audio_length_in_s=duration_sec, num_inference_steps=200).audios
         scipy.io.wavfile.write(os.path.join(OUTPUT_DIR, "music.wav"), rate=16000, data=music[0])
@@ -35,6 +36,9 @@ def generate_audio_from_story(story, voice_type, music_prompt):
         final_audio = narration.overlay(final_music - 10)
         final_path = os.path.join(OUTPUT_DIR, "final_story.wav")
         final_audio.export(final_path, format="wav")
+
+        # ✅ DOWNLOAD IN COLAB
+        files.download(final_path)
 
         return final_path
     except Exception as e:
