@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory, send_file
 from story_generation import generate_story
 from image_generation import generate_images_from_story
 from audio_generation import generate_audio_from_story
@@ -68,7 +68,7 @@ def download_pdf():
         story = data.get("story")
         image_urls = data.get("images", [])
         pdf_path = create_pdf(story, image_urls)
-        return jsonify({"pdf": os.path.basename(pdf_path)})
+        return send_file(pdf_path, as_attachment=True)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -82,4 +82,4 @@ def home():
 
 if __name__ == '__main__':
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 5000
-    app.run(port = port)
+    app.run(port=port)
