@@ -1,11 +1,27 @@
 import os
+import re
 from openai import OpenAI
 from openai.types.chat import ChatCompletionMessageParam
 
 # Initialize client
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
+def clean_incomplete_ending(text):
+    """
+    Removes the last sentence if it doesn't end with a proper sentence-ending punctuation.
+    """
+    # Match sentences that end with '.', '!', or '?'
+    sentences = re.findall(r'[^.!?]*[.!?]', text, re.DOTALL)
+
+    # Join all complete sentences
+    cleaned_text = ''.join(sentences).strip()
+
+    return cleaned_text
+
 def generate_story(prompt, max_tokens=500):
+    """
+    Generates a story based on the user's prompt and trims any incomplete ending.
+    """
     try:
         messages: list[ChatCompletionMessageParam] = [
             {
@@ -28,7 +44,9 @@ def generate_story(prompt, max_tokens=500):
         )
 
         story = response.choices[0].message.content.strip()
-        return story
+
+        # Clean up any incomplete ending
+        return clean_incomplete_ending(story)
 
     except Exception as e:
         raise RuntimeError(f"Failed to generate story: {str(e)}")
