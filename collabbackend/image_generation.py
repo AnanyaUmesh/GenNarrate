@@ -6,7 +6,13 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 def extract_key_moments(story: str, n: int):
     try:
-        prompt = f"Extract {n} key visual moments from this story as prompts for image generation :\n{story} let it be short, crisp and meaningful so that we get good images from the prompt that you give"
+        prompt = (
+            f"Read the following story and extract {n} visually rich moments. "
+            "DO NOT include character names. Instead, describe their species (e.g., 'a clever fox', 'an old owl'). "
+            "Make the prompts short, vivid, and descriptive enough to generate high-quality images. "
+            "Only return image generation prompts, each on a new line:\n\n"
+            f"{story}"
+        )
 
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
@@ -33,7 +39,7 @@ def generate_images_from_story(story: str, num_images: int = 1):
                 prompt=p,
                 n=1,
                 size="1024x1024",
-                model="dall-e-3"  # or "dall-e-2" if DALL·E 3 access isn't enabled
+                model="dall-e-3"  # or "dall-e-2" if needed
             )
             images.append(image_resp.data[0].url)
 
