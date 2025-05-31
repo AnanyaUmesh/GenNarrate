@@ -16,11 +16,11 @@ class PDF(FPDF):
         self.set_font("Arial", "", 12)
         self.multi_cell(0, 10, text)
 
-    def add_image(self, image_url):
+    def add_image(self, image_url, idx):
         try:
             response = requests.get(image_url)
             image = Image.open(BytesIO(response.content))
-            temp_path = os.path.join(OUTPUT_DIR, "temp_image.jpg")
+            temp_path = os.path.join(OUTPUT_DIR, f"temp_image_{idx}.jpg")
             image.save(temp_path)
             self.image(temp_path, w=150)
         except Exception as e:
@@ -31,9 +31,9 @@ def create_pdf(story_text, image_urls):
     pdf.add_page()
     pdf.add_story_text(story_text)
 
-    for url in image_urls:
+    for idx, url in enumerate(image_urls):
         pdf.add_page()
-        pdf.add_image(url)
+        pdf.add_image(url, idx)
 
     output_path = os.path.join(OUTPUT_DIR, "story_output.pdf")
     pdf.output(output_path)
