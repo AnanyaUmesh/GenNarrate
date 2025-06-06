@@ -4,15 +4,18 @@ from pydub.effects import normalize, low_pass_filter
 from diffusers import AudioLDM2Pipeline
 import torch, re, os, scipy
 
-OUTPUT_DIR = "outputs"
+# Change OUTPUT_DIR to a subfolder for audio files
+OUTPUT_DIR = os.path.join("outputs", "audio")
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 def generate_audio_from_story(story, voice_type, music_prompt):
     try:
+        # Split story into sentences or chunks
         text_chunks = re.split(r'(?<=[.!?])\s+', story.strip())
         audio_segments = []
 
         def get_tts(text):
+            # Choose TLD based on voice_type
             return gTTS(text=text, lang="en", tld={"male": "co.uk", "child": "com.au"}.get(voice_type, "com"))
 
         for i, chunk in enumerate(text_chunks):
@@ -22,10 +25,12 @@ def generate_audio_from_story(story, voice_type, music_prompt):
             segment = AudioSegment.from_mp3(fname)
             audio_segments.append(segment)
 
+        # Concatenate all audio chunks
         narration = sum(audio_segments)
         narration = normalize(low_pass_filter(narration, 3000))
         narration.export(os.path.join(OUTPUT_DIR, "narration.wav"), format="wav")
 
+        # Load AudioLDM model on GPU
         pipe = AudioLDM2Pipeline.from_pretrained("cvssp/audioldm2-music", torch_dtype=torch.float16).to("cuda")
         duration_sec = len(narration) // 1000
         music = pipe(prompt=music_prompt, audio_length_in_s=duration_sec, num_inference_steps=200).audios
