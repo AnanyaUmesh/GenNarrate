@@ -11,7 +11,10 @@ app = Flask(__name__)
 CORS(app)
 
 OUTPUT_DIR = "outputs"
+AUDIO_DIR = os.path.join(OUTPUT_DIR, "audio")        # Your audio files are saved here
+PDF_DIR = os.path.join(OUTPUT_DIR, "pdf")
 os.makedirs(OUTPUT_DIR, exist_ok=True)
+os.makedirs(PDF_DIR, exist_ok=True)  # Make sure PDF output folder exists
 
 @app.route('/generate_story', methods=['POST'])
 def generate_story_endpoint():
@@ -56,23 +59,36 @@ def generate_audio_endpoint():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route('/download_audio')
-def download_audio():
-    filename = request.args.get("file")
-    return send_from_directory(OUTPUT_DIR, filename, as_attachment=True)
+@app.route('/download_audio/<filename>', methods=['GET'])
+def download_audio(filename):
+    # Send audio file from OUTPUT_DIR (where audio is saved)
+    return send_from_directory(AUDIO_DIR, filename, as_attachment=True)
 
-@app.route('/download_pdf', methods=['POST'])
-def download_pdf():
+@app.route('/generate_pdf', methods=['POST'])
+def generate_pdf_endpoint():
     try:
         data = request.json
         story = data.get("story")
         image_urls = data.get("images", [])
+
         pdf_path = create_pdf(story, image_urls)
-        return send_file(pdf_path, as_attachment=True)
+
+        # Move the PDF into PDF_DIR if not already there
+        pdf_filename = os.path.basename(pdf_path)
+        new_pdf_path = os.path.join(PDF_DIR, pdf_filename)
+        if pdf_path != new_pdf_path:
+            os.rename(pdf_path, new_pdf_path)
+
+        return jsonify({"pdf": pdf_filename})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route('/download/<filename>')
+@app.route('/download_pdf/<filename>', methods=['GET'])
+def download_pdf(filename):
+    # Send PDF file from PDF_DIR
+    return send_from_directory(PDF_DIR, filename, as_attachment=True)
+
+@app.route('/download/<filename>', methods=['GET'])
 def download_file(filename):
     return send_from_directory(OUTPUT_DIR, filename, as_attachment=True)
 
