@@ -5,7 +5,8 @@ from io import BytesIO
 import os
 import unicodedata
 
-OUTPUT_DIR = "outputs"
+# Use a dedicated PDF output folder
+OUTPUT_DIR = os.path.join("outputs", "pdf")
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 def clean_text(text):
@@ -18,7 +19,7 @@ class PDF(FPDF):
 
     def add_story_text(self, text):
         self.set_font("Arial", "", 12)
-        self.multi_cell(0, 10, clean_text(text))  # <--- cleaned text here
+        self.multi_cell(0, 10, clean_text(text))
 
     def add_image(self, image_url, idx):
         try:
