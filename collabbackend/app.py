@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify, send_from_directory, send_file
+from google.colab import files
 from story_generation import generate_story
 from image_generation import generate_images_from_story
 from audio_generation import generate_audio_from_story
@@ -73,12 +74,31 @@ def generate_pdf_endpoint():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route('/download/<filename>', methods=['GET'])
-def download_file(filename):
-    if filename.endswith(".wav") or filename.endswith(".mp3"):
-        return send_from_directory(AUDIO_DIR, filename, as_attachment=True)
-    else:
-        return send_from_directory(os.path.join("outputs", "pdf"), filename, as_attachment=True)
+@app.route('/trigger_pdf_download', methods=['POST'])
+def trigger_pdf_download():
+    try:
+        data = request.json
+        filename = data.get("filename")
+        full_path = os.path.join(PDF_DIR, filename)
+        if not os.path.isfile(full_path):
+            return "File not found", 404
+        files.download(full_path)  # this triggers the Colab system download
+        return "Success", 200
+    except Exception as e:
+        return str(e), 500
+
+@app.route('/trigger_audio_download', methods=['POST'])
+def trigger_audio_download():
+    try:
+        data = request.json
+        filename = data.get("filename")
+        full_path = os.path.join(AUDIO_DIR, filename)
+        if not os.path.isfile(full_path):
+            return "File not found", 404
+        files.download(full_path)
+        return "Success", 200
+    except Exception as e:
+        return str(e), 500
         
 @app.route("/")
 def home():
