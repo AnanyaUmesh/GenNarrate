@@ -59,11 +59,6 @@ def generate_audio_endpoint():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route('/download_audio/<filename>', methods=['GET'])
-def download_audio(filename):
-    # Send audio file from OUTPUT_DIR (where audio is saved)
-    return send_from_directory(AUDIO_DIR, filename, as_attachment=True)
-
 @app.route('/generate_pdf', methods=['POST'])
 def generate_pdf_endpoint():
     try:
@@ -72,21 +67,19 @@ def generate_pdf_endpoint():
         image_urls = data.get("images", [])
 
         pdf_path = create_pdf(story, image_urls)
+        filename = os.path.basename(pdf_path)
 
-        # Move PDF to PDF_DIR if not already there
-        pdf_filename = os.path.basename(pdf_path)
-        new_pdf_path = os.path.join(PDF_DIR, pdf_filename)
-        if pdf_path != new_pdf_path:
-            os.rename(pdf_path, new_pdf_path)
-
-        return jsonify({"pdf": pdf_filename})
+        return jsonify({"pdf": filename})  # just return file name
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route('/download_pdf/<filename>', methods=['GET'])
-def download_pdf(filename):
-    return send_from_directory(PDF_DIR, filename, as_attachment=True)
-    
+@app.route('/download/<filename>', methods=['GET'])
+def download_file(filename):
+    if filename.endswith(".wav") or filename.endswith(".mp3"):
+        return send_from_directory(AUDIO_DIR, filename, as_attachment=True)
+    else:
+        return send_from_directory(os.path.join("outputs", "pdf"), filename, as_attachment=True)
+        
 @app.route("/")
 def home():
     return "Hello from GenNarrate"
