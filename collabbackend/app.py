@@ -73,7 +73,7 @@ def generate_pdf_endpoint():
 
         pdf_path = create_pdf(story, image_urls)
 
-        # Move the PDF into PDF_DIR if not already there
+        # Move PDF to PDF_DIR if not already there
         pdf_filename = os.path.basename(pdf_path)
         new_pdf_path = os.path.join(PDF_DIR, pdf_filename)
         if pdf_path != new_pdf_path:
@@ -85,13 +85,8 @@ def generate_pdf_endpoint():
 
 @app.route('/download_pdf/<filename>', methods=['GET'])
 def download_pdf(filename):
-    # Send PDF file from PDF_DIR
     return send_from_directory(PDF_DIR, filename, as_attachment=True)
-
-@app.route('/download/<filename>', methods=['GET'])
-def download_file(filename):
-    return send_from_directory(OUTPUT_DIR, filename, as_attachment=True)
-
+    
 @app.route("/")
 def home():
     return "Hello from GenNarrate"
